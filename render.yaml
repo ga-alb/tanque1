@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: tanque-de-condensado
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: tanque-de-condensados-04115fb3a005.json 
