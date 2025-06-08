@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoreo de Temperatura</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        .alerta {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+    {% if alerta %}
+        <div class="alerta">¡ALERTA! Se detectaron subidas bruscas en una o más temperaturas.</div>
+    {% endif %}
+
+    <h2>Gráfica de Temperaturas</h2>
+    <div id="grafica">{{ graph_html|safe }}</div>
+
+    <h2>Pronóstico de Subidas (Próxima Lectura)</h2>
+    <table>
+        <tr>
+            <th>Temperatura</th>
+            <th>Pronóstico</th>
+            <th>Fecha estimada</th>
+        </tr>
+        {% for p in pronosticos %}
+        <tr>
+            <td>{{ p.temperatura }}</td>
+            <td>{{ p.pronostico }}</td>
+            <td>{{ p.fecha }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Fechas de posibles fallas</h2>
+    {% if fallas %}
+        <table>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Temp 1 (°C)</th>
+                <th>Temp 2 (°C)</th>
+                <th>Temp 3 (°C)</th>
+            </tr>
+            {% for row in fallas %}
+            <tr>
+                <td>{{ row['FechaHora'] }}</td>
+                <td>{{ row['Temp 1'] }}</td>
+                <td>{{ row['Temp 2'] }}</td>
+                <td>{{ row['Temp3'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No se detectaron fallas.</p>
+    {% endif %}
+
+</body>
+</html>
