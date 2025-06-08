@@ -5,15 +5,17 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 import plotly.graph_objs as go
 import plotly.io as pio
+import os
+import json
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    # Conexión con Google Sheets
+    # Conexión con Google Sheets (usando credenciales desde variable de entorno)
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(
-        "C:/Users/Marieta/Documents/PlatformIO/Projects/termotanque/src/tanque-de-condensados-04115fb3a005.json", scope)
+    json_creds = json.loads(os.environ['GOOGLE_CREDENTIALS'])  # 👈 aquí va la variable
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(json_creds, scope)
     client = gspread.authorize(creds)
     sheet = client.open("prueba 2").sheet1
 
@@ -42,7 +44,7 @@ def index():
             pred_futuro = model.predict([X.iloc[-1].values])[0]
             pronostico_texto = 'Sube' if pred_futuro == 1 else 'No sube'
             if pred_futuro == 1:
-                alarma_pronostico = True  # activa alarma si algún pronóstico indica subida
+                alarma_pronostico = True
             pronosticos.append({
                 'temperatura': temp_col,
                 'pronostico': pronostico_texto,
@@ -55,12 +57,11 @@ def index():
                 'fecha': '---'
             })
 
-    # Últimos 10 registros con temperatura > 80 en cualquiera de las 3 columnas
+    # Últimos 10 registros con temperatura > 80
     fallas_tabla = df[
         (df['Temp 1'] > 80) | (df['Temp 2'] > 80) | (df['Temp3'] > 80)
     ].sort_values(by='FechaHora', ascending=False).head(10)
 
-    # Alerta basada en pronóstico
     alerta = alarma_pronostico
 
     # Gráfica
